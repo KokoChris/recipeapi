@@ -11,12 +11,29 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/recipes', (req,res) => {
 
-client.lrange('papares', 0, -1, function(err, reply) {
-      res.send(reply); // ['angularjs', 'backbone']
-});
+    client.hgetall('recipes',(err,reply) => {
+        res.send(reply);
+    });
 })
 
-app.post('/', (req,res) => {
+app.post('/recipes', (req,res) => {
+
+  client.incr('recipekey',(err,reply)=> {
+     let recipeId = reply;
+     let title = 'testing a bit';
+     let ingredients = 'first,second and one more';
+     let recipe = JSON.stringify({
+     
+       recipeId,
+       title,
+       ingredients
+     
+     
+     });
+     client.hmset('recipes',`recipe:${recipeId}`,recipe)
+     res.send('it worked');
+
+  });
   
 
 })
@@ -51,7 +68,4 @@ let testRecipe = JSON.stringify({
 });
 
 
-client.hmset('giwnia', 'soup3', testRecipe);
-client.rpush(['papares', testRecipe], function(err, reply) {
-      console.log(reply); //prints 2
-});
+  
