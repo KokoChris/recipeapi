@@ -4,7 +4,7 @@ let bodyParser = require('body-parser');
 let app = express();
 let port = process.env.PORT || 3000;
 var redis = require('redis');
-var client = redis.createClient(); //creates a new client
+var client = redis.createClient(process.env.REDIS_URL); //creates a new client
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 
