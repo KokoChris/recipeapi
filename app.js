@@ -43,7 +43,7 @@ app.post('/api/recipes', (req,res) => {
 
 })
 
-app.get('api/recipes/:id' , (req,res) => {
+app.get('/api/recipes/:id' , (req,res) => {
   let recipeId = req.params.id;
   client.hget('recipes', `recipe:${recipeId}`, (err,recipe) => {
         if(err) {
@@ -55,7 +55,7 @@ app.get('api/recipes/:id' , (req,res) => {
   });
 
 })
-app.put('api/recipes/:id', (req,res) => {
+app.put('/api/recipes/:id', (req,res) => {
   let recipeId = req.params.id;
   client.hexists('recipes', `recipe:${recipeId}`,(err,recipeExists) => {
   	if(err){
@@ -90,7 +90,7 @@ app.put('api/recipes/:id', (req,res) => {
      
 });
 
-app.delete('api/recipes/:id' , (req,res) => {
+app.delete('/api/recipes/:id' , (req,res) => {
   let recipeId = req.params.id;
   client.hdel('recipes',`recipe:${recipeId}`,(err)=> {
          if(err){
