@@ -1,7 +1,6 @@
 {
   "name": "recipeapi",
   "version": "1.0.0",
-  "description": "",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,5 +11,15 @@
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
     "redis": "^2.6.2"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KokoChris/recipeapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KokoChris/recipeapi/issues"
+  },
+  "homepage": "https://github.com/KokoChris/recipeapi#readme",
+  "description": "a not so important project"
 }

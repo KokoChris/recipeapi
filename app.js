@@ -1,5 +1,4 @@
 'use strict';
-
 const express = require('express');
 let bodyParser = require('body-parser');
 let app = express();
@@ -9,63 +8,104 @@ var client = redis.createClient(); //creates a new client
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/recipes', (req,res) => {
-
-    client.hgetall('recipes',(err,reply) => {
-        res.send(reply);
-    });
+app.get('/api/recipes', (req,res) => {
+    client.hgetall('recipes',(err,recipesObj) => {
+        if (recipesObj){
+            let listOfRecipes = Object.keys(recipesObj).map(key => recipesObj[key]) 
+	    res.status(200).send(listOfRecipes);
+	} else {
+	  res.send([]);
+        }
+    })
 })
 
-app.post('/recipes', (req,res) => {
-
+app.post('/api/recipes', (req,res) => {
   client.incr('recipekey',(err,reply)=> {
+     console.log(req.body);
      let recipeId = reply;
-     let title = 'testing a bit';
-     let ingredients = 'first,second and one more';
+     let title = req.body.title;
+     let ingredients = req.body.ingredients;
      let recipe = JSON.stringify({
-     
        recipeId,
        title,
        ingredients
-     
-     
      });
-     client.hmset('recipes',`recipe:${recipeId}`,recipe)
-     res.send('it worked');
-
-  });
+     client.hmset('recipes',`recipe:${recipeId}`,recipe, (err)=> {
+       if (err) {
+         throw err;	
+	 res.send('something went wrong');
+       } else {
+         res.status(201).send('new recipe created');
+       }
+    })
+  })
   
 
 })
 
-app.get('/recipes/:id' , (req,res) => {
-  res.send('your recipe');
+app.get('api/recipes/:id' , (req,res) => {
+  let recipeId = req.params.id;
+  client.hget('recipes', `recipe:${recipeId}`, (err,recipe) => {
+        if(err) {
+	   throw err;
+	   res.status(404).send('could not retrieve recipe');
+	} else {
+           res.status(200).send(recipe);
+	}
+  });
 
 })
-app.put('/recipes/:id', (req,res) => {
+app.put('api/recipes/:id', (req,res) => {
+  let recipeId = req.params.id;
+  client.hexists('recipes', `recipe:${recipeId}`,(err,recipeExists) => {
+  	if(err){
+		throw err;
+		res.send('could not update resource');
+	} else if (!recipeExists) {
 
-  res.send('your request');
+	   
+          res.status(404).send('recipe was not found, nothing to update here')
+	
+          
+	} else {
+
+	 	 let recipeId = req.params.id;
+	  	 let title = req.body.title;
+         	 let ingredients = req.body.ingredients;
+	 	 let updatedRecipe = JSON.stringify({
+	       		recipeId,
+       	      	         title,
+               		ingredients
+     		  });
+          
+	 	client.hmset('recipes',`recipe:${recipeId}`, updatedRecipe,(err)=> {
+	   		if(err) {
+		         	throw err;
+ 			} else {
+			       res.send('resource updated');      
+			}
+          	});	
+	}
+  }); 
+     
 });
 
-app.delete('/recipes/:id' , (req,res) => {
-  res.send('deleted')
+app.delete('api/recipes/:id' , (req,res) => {
+  let recipeId = req.params.id;
+  client.hdel('recipes',`recipe:${recipeId}`,(err)=> {
+         if(err){
+	   throw err;
+	 } else {
+           res.send('done');
+	 } 
+  });
 });
 
 app.listen(port,() => {
   console.log(`Server is running on port ${port}`);
 })
 
-
-
 client.on('connect', function() {
       console.log('connected to redis db');
 });
-
-
-let testRecipe = JSON.stringify({
-  name:"bales",
-  ingredients:["ingredient4" , "ingredient5", "ingredient3"]
-});
-
-
   
